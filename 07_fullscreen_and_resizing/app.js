@@ -14,8 +14,8 @@ renderer.setSize(size.width, size.height)
 renderer.render(scene, camera)
 
 canvas.addEventListener("mousemove", e => {
-    cursor.x = (e.clientY/size.width - 0.5)
-    cursor.y = (e.clientX/size.height - 0.5)
+    cursor.x = (e.clientY/size.height - 0.5)
+    cursor.y = (e.clientX/size.width - 0.5)
 })
 
 const tick = () => {
@@ -26,3 +26,7 @@ const tick = () => {
 }
 
 tick()
+
+export {
+    renderer
+}
