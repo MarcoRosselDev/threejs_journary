@@ -28,5 +28,6 @@ const tick = () => {
 tick()
 
 export {
-    renderer
+    renderer,
+    canvas
 }
