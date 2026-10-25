@@ -1,8 +1,19 @@
-import { BoxGeometry, Mesh, MeshBasicMaterial } from "three";
+import { BoxGeometry, Mesh, MeshBasicMaterial, SphereGeometry } from "three";
 
 const cube = new Mesh(
     new BoxGeometry(1,1,1),
-    new MeshBasicMaterial({color: "purple"})
+    new MeshBasicMaterial({
+        color: "purple",
+        wireframe: true
+    })
 )
 
-export { cube }
+const esfera = new Mesh(
+    new SphereGeometry(1, 32, 32),
+    new MeshBasicMaterial({
+        color:"red",
+        wireframe: true
+    })
+)
+
+export { cube, esfera }
