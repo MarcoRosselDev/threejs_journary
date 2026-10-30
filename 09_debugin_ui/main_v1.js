@@ -2,7 +2,13 @@ import * as THREE from "three"
 import gsap from "gsap"
 // lil-gui
 import GUI from 'lil-gui';
-const gui = new GUI()
+const gui = new GUI({ 
+    width: 600,
+    title: 'Nice debug UI',
+    closeFolders: true
+})
+const folder_one = gui.addFolder('folder one')
+const folder_two = gui.addFolder('folder two')
 const debugObj = {}
 
 // gui.add(myObject, "myBoolean")
@@ -33,14 +39,14 @@ scene.add(camera, mesh)
 //gui.add(mesh.position, 'y', - 3, 3, 0.01)
 // esto hace lo mismo pero es mas claro que en una sola linea donde no sabemos que hace cada argumento que damos a simple vista
 // tendriamos que releer la documentacion para recordarlo denuevo o tendriamos que dejar comentarios de que hace cada parametro
-gui
+folder_one
     .add(mesh.position, 'y')
     .min(- 3)
     .max(3)
     .step(0.01)
     .name("mi nombre de prueba")
 
-gui
+folder_one
     .add(material, 'wireframe')
 
 /* gui
@@ -50,7 +56,7 @@ gui
         debugObj.color = value.getHexString()
     }) */
 
-gui
+folder_two
     .addColor(debugObj, 'color')
     .onChange(() => material.color.set(debugObj.color))
 
@@ -120,7 +126,7 @@ debugObj.fn = () => {
     gsap.to(mesh.position, { duration: 1, delay: 1, x: 2 })
 }
 
-gui
+folder_two
     .add(debugObj, 'fn')
 
 
