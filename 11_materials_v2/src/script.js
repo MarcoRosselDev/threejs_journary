@@ -1,5 +1,9 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
+// import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js' // esto es para cargar la textura de enviromentMap
+import { HDRLoader } from 'three/addons/loaders/HDRLoader.js';
+import GUI from 'lil-gui'
+const gui = new GUI()
 const canvas = document.querySelector('canvas.webgl')
 const scene = new THREE.Scene()
 const sizes = {
@@ -49,60 +53,105 @@ const gradientTexture = textureLoader.load('./textures/gradients/5.jpg')
 doorColorTexture.colorSpace = THREE.SRGBColorSpace
 matcapTexture.colorSpace = THREE.SRGBColorSpace
 /**
+ * Environment map
+ */
+const rgbeLoader = new HDRLoader()
+rgbeLoader.load('./textures/environmentMap/2k.hdr', (environmentMap) =>
+    {
+        environmentMap.mapping = THREE.EquirectangularReflectionMapping
+    
+        scene.background = environmentMap
+        scene.environment = environmentMap
+    })
+/**
  * Objects
  */
-
+{
 // MeshBasicMaterial
-//const material = new THREE.MeshBasicMaterial()
-//const material = new THREE.MeshBasicMaterial({ map: doorColorTexture })
+// const material = new THREE.MeshBasicMaterial()
+// const material = new THREE.MeshBasicMaterial({ map: doorColorTexture })
 /* const material = new THREE.MeshBasicMaterial()
-//material.map = doorColorTexture
-material.color = new THREE.Color('indigo')
-//material.wireframe = true
-material.transparent = true
-//material.opacity = 0.5
-material.alphaMap = doorColorTexture
-material.side = THREE.DoubleSide // por defecto es THREE.FrontSide, podemos cambiarlo a THREE.BackSide o a THREE.DoubleSide para que muestre los dos lados de la cara, mas costoso pero util para cuando tenemos un plano de 2 triangulos como el Mesh llamado plane de mas abajo, porque vemos todo negro si miramos detras
+// material.map = doorColorTexture
+   material.color = new THREE.Color('indigo')
+// material.wireframe = true
+   material.transparent = true
+// material.opacity = 0.5
+   material.alphaMap = doorColorTexture
+   material.side = THREE.DoubleSide // por defecto es THREE.FrontSide, podemos cambiarlo a THREE.BackSide o a THREE.DoubleSide para que muestre los dos lados de la cara, mas costoso pero util para cuando tenemos un plano de 2 triangulos como el Mesh llamado plane de mas abajo, porque vemos todo negro si miramos detras
 */
 
 // MeshNormalMaterial
-//const material = new THREE.MeshNormalMaterial()
-//material.flatShading = true
+// const material = new THREE.MeshNormalMaterial()
+// material.flatShading = true
 
 // MeshMatcapMaterial
-//const material = new THREE.MeshMatcapMaterial()
+// const material = new THREE.MeshMatcapMaterial()
 
 // MeshLambertMaterial
-//const material = new THREE.MeshLambertMaterial({color:'pink'})
+// const material = new THREE.MeshLambertMaterial({color:'pink'})
 
 // MeshPhongMaterial
-//const material = new THREE.MeshPhongMaterial({color:'lightblue'})
-//material.shininess = 100
-//material.specular = new THREE.Color('white') // este es el color del reflejo de luz en la superficie
+// const material = new THREE.MeshPhongMaterial({color:'lightblue'})
+// material.shininess = 100
+// material.specular = new THREE.Color('white') // este es el color del reflejo de luz en la superficie
 
-const material = new THREE.MeshToonMaterial({color:'pink'})
+// MeshToonMaterial
+// const material = new THREE.MeshToonMaterial({color:'pink'})
 //material.gradientMap = gradientTexture
-gradientTexture.minFilter = THREE.NearestFilter // para que no se difuce por ser pixeles demasiado chiquitos
-gradientTexture.magFilter = THREE.NearestFilter
-material.gradientMap = gradientTexture
-gradientTexture.generateMipmaps = false //  para salvar memoria que no se esta utilizando bien
+// gradientTexture.minFilter = THREE.NearestFilter // para que no se difuce por ser pixeles demasiado chiquitos
+// gradientTexture.magFilter = THREE.NearestFilter
+// material.gradientMap = gradientTexture
+// gradientTexture.generateMipmaps = false //  para salvar memoria que no se esta utilizando bien
+// 
+// material.matcap = matcapTexture
+}
 
-material.matcap = matcapTexture
-material.side = THREE.DoubleSide
+// MeshStandardMaterial
+// const material = new THREE.MeshStandardMaterial({color: 'gold'})
+const material = new THREE.MeshStandardMaterial({})
+
+// material.metalness = 0.7 //0.89 //0.045
+// material.roughness = 0.2 //0.065
+
+// gui.add(material, 'metalness').min(0).max(1).step(0.0001)
+// gui.add(material, 'roughness').min(0).max(1).step(0.0001)
+
+// material.side = THREE.DoubleSide
+material.map = doorColorTexture
+material.aoMap = doorAmbientOcclusionTexture
+material.aoMapIntensity = 1
+material.displacementMap = doorHeightTexture
+material.displacementScale = 0.1 // controla la precicion de los detalles en las geometrias que se deforman
+gui.add(material, 'displacementScale').min(0).max(1).step(0.1)
+
+material.normalMap = doorNormalTexture // le da mas contraste a los detalles de la geometria exclusiva , marca los detalles con mas precicion
+material.metalnessMap = doorMetalnessTexture // utilizamos la textura metalica importada desde algun software de creacion de objetos 3d
+material.roughnessMap = doorRoughnessTexture // aplicamos la rugosidad mapeada por el software
+
+material.normalScale.set(0.5, 0.5) // trasformamos la escala, para hacer los objetos mas chiquitos o mas grandes
+
+// esto es para aplicar la transparencia entregada por el softare de objetos 3d como blender
+// no olvidar activar la transparencia
+material.transparent = true
+material.alphaMap = doorAlphaTexture
+
 
 const sphere = new THREE.Mesh(
-    new THREE.SphereGeometry(0.5, 16, 16),
+    // new THREE.SphereGeometry(0.5, 16, 16),
+    new THREE.SphereGeometry(0.5, 64, 64),
     material
 )
 sphere.position.x = - 1.5
 
 const plane = new THREE.Mesh(
-    new THREE.PlaneGeometry(1, 1),
+    // new THREE.PlaneGeometry(1, 1),
+    new THREE.PlaneGeometry(1, 1, 100, 100),
     material
 )
 
 const torus = new THREE.Mesh(
-    new THREE.TorusGeometry(0.3, 0.2, 16, 32),
+    // new THREE.TorusGeometry(0.3, 0.2, 16, 32),
+    new THREE.TorusGeometry(0.3, 0.2, 64, 128),
     material
 )
 torus.position.x = 1.5
@@ -113,14 +162,14 @@ scene.add(sphere, plane, torus)
 /**
  * Lights
  */
-const ambientLight = new THREE.AmbientLight(0xffffff, 1)
-scene.add(ambientLight)
+// const ambientLight = new THREE.AmbientLight(0xffffff, 1)
+// scene.add(ambientLight)
 // ------------------------------------------------------------- pointing light
-const pointLight = new THREE.PointLight(0xffffff, 30)
-pointLight.position.x = 2
-pointLight.position.y = 3
-pointLight.position.z = 4
-scene.add(pointLight)
+// const pointLight = new THREE.PointLight(0xffffff, 30)
+// pointLight.position.x = 2
+// pointLight.position.y = 3
+// pointLight.position.z = 4
+// scene.add(pointLight)
 //------------------------------------------------------------------------------------------
 
 /**
