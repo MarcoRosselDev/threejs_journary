@@ -25,6 +25,7 @@ const material = new THREE.MeshStandardMaterial({color: 'indigo'})
 const cubo_geometry = new THREE.BoxGeometry(1,1,1)
 const cubo = new THREE.Mesh(cubo_geometry, material)
 cubo.position.y = 0.5
+cubo.castShadow = true
 
 const esfera = new THREE.Mesh(new THREE.SphereGeometry(1,16, 16), material)
 esfera.position.x = 3
@@ -34,6 +35,7 @@ esfera.castShadow = true// activamos emicion de sombras
 const torus = new THREE.Mesh(new THREE.TorusGeometry(0.5, 0.3, 64, 128), material)
 torus.position.x = -3
 torus.position.y = 0.5
+torus.castShadow = true
 
 const plane = new THREE.Mesh(new THREE.PlaneGeometry(11, 6), material) 
 plane.position.y = -1
