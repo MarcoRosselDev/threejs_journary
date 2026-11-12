@@ -30,13 +30,13 @@ renderer.setSize(sizes.width, sizes.height)
 renderer.render(scene, camera)
 
 const tick = () => {
-    cube.rotation.x += 0.02
-    cube.rotation.y += 0.02
-    cube.rotation.z += 0.02
+    cube.rotation.x += 0.005
+    cube.rotation.y += 0.005
+    cube.rotation.z += 0.005
 
-    esfera.rotation.x += 0.02
-    esfera.rotation.y += 0.02
-    esfera.rotation.z += 0.02
+    esfera.rotation.x += 0.005
+    esfera.rotation.y += 0.005
+    esfera.rotation.z += 0.005
 
     renderer.render(scene, camera)
 
