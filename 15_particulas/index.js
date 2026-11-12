@@ -12,10 +12,24 @@ camera.position.z = 4
 // const matcapTexture = textureLoader.load(`./static/matcaps/${n}.png`)
 // matcapTexture.colorSpace = THREE.SRGBColorSpace
 // Material
+
+const textureLoader = new THREE.TextureLoader()
+const particleTexture = textureLoader.load('./static/particles/3.png')
+
+console.log(particleTexture);
+let a = './static/particles/6.png'
+console.log(a);
+
+
 const particlesMaterial = new THREE.PointsMaterial({
-    size: 0.02,
-    sizeAttenuation: true
+    size: 0.052,
+    sizeAttenuation: true,
+    map: particleTexture,
+    color: 'red',
+    transparent: true,   // Permite que el canal alfa de la textura se use
+    alphaTest: 0.5       // Descarta fragmentos con alpha menor a 0.5 (evita artefactos)
 })
+particlesMaterial.map = particleTexture
 // const material = new THREE.MeshMatcapMaterial({matcap: matcapTexture})
 const cube= new THREE.Points(new THREE.BoxGeometry(1,1,1), particlesMaterial)
 
