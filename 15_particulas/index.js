@@ -1,61 +1,148 @@
 import * as THREE from 'three'
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import GUI from 'lil-gui'
+
+/**
+ * Base
+ */
+// Debug
 const gui = new GUI()
-const canvas = document.querySelector('canvas.webgl'),      sizes = {width: window.innerWidth, height: window.innerHeight}
-const fov = 75,     near=0.1,       far=100,        aspect = sizes.width / sizes.height
-const scene = new THREE.Scene(),    camera = new THREE.PerspectiveCamera(fov, aspect, near, far)
-camera.position.z = 4
 
-// we have to load the matcap texture
-// const textureLoader = new THREE.TextureLoader()
-// let n = 8
-// const matcapTexture = textureLoader.load(`./static/matcaps/${n}.png`)
-// matcapTexture.colorSpace = THREE.SRGBColorSpace
-// Material
+// Canvas
+const canvas = document.querySelector('canvas.webgl')
 
+// Scene
+const scene = new THREE.Scene()
+
+/**
+ * Textures
+ */
 const textureLoader = new THREE.TextureLoader()
-const particleTexture = textureLoader.load('./static/particles/3.png')
+const particleTexture = textureLoader.load('./static/particles/2.png')
 
-console.log(particleTexture);
-let a = './static/particles/6.png'
-console.log(a);
+// const particlesGeometry = new THREE.SphereGeometry(1, 32, 32)
+// Geometry
+const particlesGeometry = new THREE.BufferGeometry()
+const count = 500
 
+const positions = new Float32Array(count * 3)
+const colors = new Float32Array(count * 3)
 
-const particlesMaterial = new THREE.PointsMaterial({
-    size: 0.052,
-    sizeAttenuation: true,
-    map: particleTexture,
-    color: 'red',
-    transparent: true,   // Permite que el canal alfa de la textura se use
-    alphaTest: 0.5       // Descarta fragmentos con alpha menor a 0.5 (evita artefactos)
-})
-particlesMaterial.map = particleTexture
-// const material = new THREE.MeshMatcapMaterial({matcap: matcapTexture})
-const cube= new THREE.Points(new THREE.BoxGeometry(1,1,1), particlesMaterial)
-
-const esfera = new THREE.Points(new THREE.SphereGeometry(0.8,36,36), particlesMaterial)
-esfera.position.x = 2
-
-scene.add(camera, cube, esfera)
-
-const renderer = new THREE.WebGLRenderer({canvas})
-renderer.setSize(sizes.width, sizes.height)
-
-renderer.render(scene, camera)
-
-const tick = () => {
-    cube.rotation.x += 0.005
-    cube.rotation.y += 0.005
-    cube.rotation.z += 0.005
-
-    esfera.rotation.x += 0.005
-    esfera.rotation.y += 0.005
-    esfera.rotation.z += 0.005
-
-    renderer.render(scene, camera)
-
-    window.requestAnimationFrame(tick)
+for(let i = 0; i < count * 3; i++)
+{
+    positions[i] = (Math.random() - 0.5) * 10
+    colors[i] = Math.random()
 }
 
+particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
+particlesGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3))
+
+// Material
+const particlesMaterial = new THREE.PointsMaterial({
+    size: 0.22,
+    sizeAttenuation: true,
+    //color: 'yellow',
+    map: particleTexture,
+    transparent: true,  // si no activamos estas dos propiedades
+    //alphaMap: particleTexture, // se vera el vorde negro y los que esten enfrente taparan las particulas de atras
+    //alphaTest: 0.001
+})
+// particlesMaterial.alphaTest = 0.001
+// particlesMaterial.depthTest = false
+particlesMaterial.depthWrite = false
+// este efecto afecta el rendimiento, no recomendado si buscas eficiencia en todos los dispositivos
+particlesMaterial.blending = THREE.AdditiveBlending // mantiene el color del pixel, creando saturacion
+particlesMaterial.vertexColors = true
+
+const cube = new THREE.Mesh(
+    new THREE.BoxGeometry(),
+    new THREE.MeshBasicMaterial()
+)
+scene.add(cube)
+
+// Points
+const particles = new THREE.Points(particlesGeometry, particlesMaterial)
+scene.add(particles)
+
+/**
+ * Sizes
+ */
+const sizes = {
+    width: window.innerWidth,
+    height: window.innerHeight
+}
+
+window.addEventListener('resize', () =>
+{
+    // Update sizes
+    sizes.width = window.innerWidth
+    sizes.height = window.innerHeight
+
+    // Update camera
+    camera.aspect = sizes.width / sizes.height
+    camera.updateProjectionMatrix()
+
+    // Update renderer
+    renderer.setSize(sizes.width, sizes.height)
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+})
+
+/**
+ * Camera
+ */
+// Base camera
+const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100)
+camera.position.z = 3
+scene.add(camera)
+
+// Controls
+const controls = new OrbitControls(camera, canvas)
+controls.enableDamping = true
+
+/**
+ * Renderer
+ */
+const renderer = new THREE.WebGLRenderer({
+    canvas: canvas
+})
+renderer.setSize(sizes.width, sizes.height)
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+
+/**
+ * Animate
+ */
+//const clock = new THREE.Clock()
+const timer = new THREE.Timer();
+timer.connect(document); // Recomendado: evita saltos de tiempo si la pestaña se oculta
+
+const tick = () =>
+{
+    // 1. OBLIGATORIO: Actualizar el timer como primer paso de cada frame
+    timer.update();
+    // 2. Ahora puedes obtener el tiempo transcurrido de forma segura
+    const elapsedTime = timer.getElapsed();
+    // const elapsedTime = clock.getElapsedTime()
+
+    // Update controls
+    controls.update()
+    
+    //const elapsedTime = clock.getElapsedTime()
+    particles.rotation.y += 0.002
+
+    for(let i = 0; i < count; i++)
+        {
+            let i3 = i * 3
+    
+            const x = particlesGeometry.attributes.position.array[i3]
+            particlesGeometry.attributes.position.array[i3 + 1] = Math.sin(elapsedTime + x)
+        }
+        particlesGeometry.attributes.position.needsUpdate = true
+    
+    // Render
+    renderer.render(scene, camera)
+
+    // Call tick again on the next frame
+    window.requestAnimationFrame(tick)
+}
 
 tick()
