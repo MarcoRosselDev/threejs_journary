@@ -2,18 +2,25 @@ import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import GUI from 'lil-gui'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
+
+const dracoLoader = new DRACOLoader()
+dracoLoader.setDecoderPath('/draco/')
+let mixer = null // para activarlo cuando se carge el modelo draco y activar la animacion
 
 /**
  * Models
  */
 const gltfLoader = new GLTFLoader()
+gltfLoader.setDRACOLoader(dracoLoader)
 gltfLoader.load(
-    // '/models/Duck/glTF-Binary/Duck.glb',
-    // '/models/Duck/glTF-Embedded/Duck.gltf',
-    // '/models/FlightHelmet/glTF/FlightHelmet.gltf',
+//     // '/models/Duck/glTF-Binary/Duck.glb',
+//     // '/models/Duck/glTF-Embedded/Duck.gltf',
+//     // '/models/FlightHelmet/glTF/FlightHelmet.gltf',
 
-    // el caso del archivo draco
-    '/models/Duck/glTF-Draco/Duck.gltf',
+//     // el caso del archivo draco
+    // '/models/Duck/glTF-Draco/Duck.gltf',
+    '/models/Fox/glTF/Fox.gltf',
     (gltf) =>
     {
         console.log('success')
@@ -30,10 +37,21 @@ gltfLoader.load(
         // hijos fuera del bucle o corridos, por eso es mejor el
         // bucle while para iterar mientras ahun queden hijos en el array children
 
-        while(gltf.scene.children.length)
-        {
-            scene.add(gltf.scene.children[0])
-        }
+        // codigo del zorro, esta sobredimencionado
+        
+        gltf.scene.scale.set(0.03, 0.03, 0.03)
+        scene.add(gltf.scene)
+
+        console.log(gltf);
+        
+        mixer = new THREE.AnimationMixer(gltf.scene)
+        const action = mixer.clipAction(gltf.animations[2])
+        action.play()
+        
+        // while(gltf.scene.children.length)
+        //     {
+        //         scene.add(gltf.scene.children[0])
+        //     }
         // esta es la solucion mas sencilla, solo agregar la scene
         //scene.add(gltf.scene)
     },
@@ -151,6 +169,11 @@ const tick = () =>
     const elapsedTime = clock.getElapsedTime()
     const deltaTime = elapsedTime - previousTime
     previousTime = elapsedTime
+    
+    if(mixer)
+        {
+            mixer.update(deltaTime)
+        }
 
     // Update controls
     controls.update()
