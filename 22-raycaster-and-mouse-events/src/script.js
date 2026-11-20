@@ -17,20 +17,21 @@ const scene = new THREE.Scene()
 /**
  * Objects
  */
+const color = 'indigo'
 const object1 = new THREE.Mesh(
     new THREE.SphereGeometry(0.5, 16, 16),
-    new THREE.MeshBasicMaterial({ color: '#ff0000' })
+    new THREE.MeshBasicMaterial({ color })
 )
 object1.position.x = - 2
 
 const object2 = new THREE.Mesh(
     new THREE.SphereGeometry(0.5, 16, 16),
-    new THREE.MeshBasicMaterial({ color: '#ff0000' })
+    new THREE.MeshBasicMaterial({ color })
 )
 
 const object3 = new THREE.Mesh(
     new THREE.SphereGeometry(0.5, 16, 16),
-    new THREE.MeshBasicMaterial({ color: '#ff0000' })
+    new THREE.MeshBasicMaterial({ color })
 )
 object3.position.x = 2
 
